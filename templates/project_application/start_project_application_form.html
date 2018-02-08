@@ -1,0 +1,68 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block title %}New Project Application Registration{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Registration</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+    {% if form.errors or form.non_field_errors %}
+      <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+  <div class="container-fluid">
+  
+    <h3>Welcome to the {{ org_name }} Project Application website.</h3>
+    <form method="post">{% csrf_token %}
+      <div class="panel panel-primary">
+        <div class="panel-heading">
+          <h4 class="panel-title">Applicant's e-mail address</h4>
+        </div>
+        <div class="panel-body">
+          <p>Please enter your e-mail (from your institute)</p>
+          <p>A link will be sent to you at this e-mail address.<p>
+          <p>The link is the <strong>only way</strong> to access this application, so please keep it for the duration of the application period.</p>
+          <p>The link will expire at 11:59pm on <strong>{{ expiry|date:"D d M Y" }}</strong></p>
+        </div>
+        <ul class="list-group">
+          <li class="list-group-item">
+          <fieldset>
+            {% if form.non_field_errors %}
+              <div class="form_errors">
+                {% for err in form.non_field_errors %}
+                  <div class="alert alert-danger">{{ err }}</div>
+                {% endfor %}
+              </div>  
+            {% endif %}
+            {% for hidden in form.hidden_fields %}
+               {{ hidden }}
+            {% endfor %}
+            <div class="form-inline form-group">
+              <div {% if form.email.errors %}class="alert alert-danger"{% endif %}>
+                <label required>e-mail:</label> {{ form.email }}
+                {% for err in form.email.errors %}
+                  <p class="alert alert-danger">{{ err }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="form-inline form-group">
+              <div {% if form.captcha.errors %}class="alert alert-danger"{% endif %}>
+                <label required>CAPTCHA:</label><br/>{{ form.captcha }}
+                {% for err in form.captcha.errors %}
+                  <p class="alert alert-danger">{{ err }}</p>
+                {% endfor %}
+                <span class="help-block">Please enter the text displayed in the image above. Case insensitive.</span>
+              </div>
+            </div>
+          </fieldset>
+        </li>
+        </ul>
+        <div class="panel-footer">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

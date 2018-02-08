@@ -1,0 +1,28 @@
+{% extends "project_application/project_application_forms.html" %}
+
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Link Not Found</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="panel panel-default padtop">
+    <div class="panel-heading">
+      <h4 class="panel-title">Link Not Found</h4>
+    </div>
+    <div class="panel-body">
+      <p>This application is no longer viewable. This could be due to:</p>
+      <ul>
+        <li>The application has expired.</li>
+        <li>You have already submitted the application.</li>
+        <li>There is an error in the link (the link may be broken across two lines).</li>
+        <li>The application has been modified by an administrator.</li>
+      </ul>
+      <p>If you have any comments or enquiries, please contact {{ help_email|urlize }}</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+{% extends "project_application/project_application_forms.html" %}
+{% load staticfiles %}
+
+{% block title %}Resource Application: Summary{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Summary</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+  <div class="container-fluid">
+    {% if form.errors or form.non_field_errors %}
+      <p class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp;Please correct any errors below.</p>
+    {% endif %}
+    <p class="lead padtop">Complete and submit by <strong>11:59pm {{ project_application.expires|date:"l j F Y" }}</strong></p>
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Advice on completing this form</h3>
+      </div>
+      <div class="panel-body">
+        <p>If any section is shown as "Incomplete", please check that all required information in that section has been provided (you may need to scroll <strong>right</strong> and down to check).</p>
+        <p>Required fields have a highlighted background.</p>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Summary</h3>
+      </div>
+      <div class="panel-body">
+        <div class="form-group">
+          <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_parta' project_application.secret_token %}'">Personnel</button>
+          <ol>
+            {% if not complete.a %}
+              <img src="{% static 'img/icon_alert.gif' %}" alt="alert"/> Incomplete
+            {% else %}
+              <img src="{% static 'img/icon_success.gif' %}" alt="success"/> OK
+            {% endif %}
+          </ol>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_partb' project_application.secret_token %}'">Project Overview</button>
+          <ol>
+            {% if not complete.b %}
+              <img src="{% static 'img/icon_alert.gif' %}" alt="alert"/> Incomplete
+            {% else %}
+              <img src="{% static 'img/icon_success.gif' %}" alt="success"/> OK
+            {% endif %}
+          </ol>
+        </div>
+        <div class="form-group">
+          <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_partc' project_application.secret_token %}'">Resource Requirements</button>
+          <ol>
+            {% if not complete.c %}
+              <img src="{% static 'img/icon_alert.gif' %}" alt="alert"/> Incomplete
+            {% else %}
+              <img src="{% static 'img/icon_success.gif' %}" alt="success"/> OK
+            {% endif %}
+          </ol>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="form-group">
+          <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_pdf' project_application.secret_token %}'" > PDF </button>
+          <p>A PDF of the application will be e-mailed to you when the application is submitted.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <form method="post" action=".">{% csrf_token %}
+      <fieldset>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="form-group">
+              {% if is_admin %}
+                {% if project_application.state in 'KCAR' %}
+                  <button class="btn btn-primary" type="submit" name="adminunsubmit">Mark as Open (Unsubmit)</button>
+                {% else %}
+                  <button class="btn btn-primary" type="submit" name="adminsubmit">Mark as Submitted</button>
+                {% endif %}
+              {% else %}
+                {% if complete_all %}
+                  {% if project_application.tac %}
+                    <button class="btn btn-primary" type="submit" name="action">Submit</button>
+                  {% else %}
+                    <button class="btn btn-default" disabled="disabled" type="submit" name="action">Submit</button>
+                  {% endif %}
+                  <p class="help-block">After submitting, the submission can be viewed and exported to PDF until the closing date.</p>
+                  <p class="help-block"/>To Submit your application you must agree to the Terms and Conditions.</p>
+                {% else %}
+                  <label class="btn btn-default" disabled="disabled" >Submit</label>
+                  <p class="help-block"/>All sections must be complete before you can submit the application.</p>
+                {% endif %}
+              {% endif %}
+            </div>
+            <div class="form-inline">
+              <div form="form-group">
+              {{ form.non_field_errors }}
+              {{ form.management_form }}
+              <p>{{ form.tac.errors }}{{ form.tac }} I agree to the {{ org_name }} Terms and Conditions. {{ AUP_URL }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+{% endblock %}
+
+{% block extrascript %}
+  <script>
+    $(document).on( "change", "input[type=checkbox]",                                                    
+        function() {
+            $('button[name="action"]').toggleClass("btn-default, btn-primary");
+            if ($(this).is(":checked")) {
+                $('button[name="action"]').removeAttr('disabled');
+            } else {
+                $('button[name="action"]').attr("disabled", "disabled");
+            };
+        } );
+  </script>
+{% endblock %}

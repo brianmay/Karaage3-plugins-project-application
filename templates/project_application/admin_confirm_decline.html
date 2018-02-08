@@ -1,0 +1,160 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block extrahead %}
+{% load staticfiles %}
+{% endblock %}
+
+{% block content_title %}Decline Application{% endblock %}
+
+{% block navigation %}
+<ul class="nav navbar-nav">
+  <li class="active"><a>Decline Application</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+  <form method="post" action=".">{% csrf_token %}
+    {{ form.management_form }}
+
+    {% if form.errors or form.non_field_errors %}
+    <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+    {% for err in form.non_field_errors %}
+    <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ err }}</div>
+    {% endfor %}
+    {% endif %}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Decline Process</h3>
+      </div>
+      <div class="panel-body">
+        {% if form.non_field_errors %}
+        {% for err in form.non_field_errors %}
+        <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ err }}</div>
+        {% endfor %}
+        {% endif %}
+        <p>Declining an application marks it as declined.</p>
+        <p>The applicant will need to be contacted and informed of why the
+        application has been declined.</p>
+      </div>
+    </div>
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Project Details</h3>
+      </div>
+      <div class="panel-body">
+        <div class="panel panel-default padtop">
+          <div class="panel-body">
+            <div class="row">
+                <div class="col-md-2">
+                  <label class="required">Associated/New Project</label>
+                </div>
+                <div class="col-md-10">
+                  {{ project_application.associated }}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                  <label class="required">Host Institute, Faculty, School</label>
+                </div>
+          <p>{{ supervisor.institute|default:"<h6>incomplete</h6>" }},
+             {{ supervisor.faculty|default:"<h6>incomplete</h6>" }},
+             {{ supervisor.department|default:"<h6>incomplete</h6>" }}
+          </p>
+            </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="row">
+                <div class="col-md-2">
+                  <label class="required">Requested/New Title</label>
+                </div>
+                <div class="col-md-10">
+                  {{ project_application.title|default:"<h6>incomplete</h6>" }}
+                </div>
+            </div>
+          </div>
+        </div>
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Leaders</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th><label >Project<br/>Supervisor</label></th>
+                <th><label >Applicant</label></th>
+                <th><label >Leader</label></th>
+                <th><label >Title</label></th>
+                <th><label >Given<br/>Name</label></th>
+                <th><label >Family<br/>Name</label></th>
+                <th><label >Email</label></th>
+                <th><label >Institute</label></th>
+                <th><label >Faculty</label></th>
+                <th><label>Department</label></th>
+                <th><label >Contact<br/>Telephone<br/>Number</label></th>
+                <th><label >Level</label></th>
+                <th><label >Role</label></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in members %}
+              <tr>
+                <td align="center">
+                  {% if p.is_supervisor %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_applicant %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_leader %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td>{{ p.title|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.first_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.last_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.email|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.institute|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.faculty|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.department|default:"<h6>left blank</h6>" }}</td>
+                <td>{{ p.telephone|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_level_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_role_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <fieldset>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="form-group">
+            <button class="btn btn-warning" type="submit">Confirm Decline</button>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</div>
+{% endblock %}

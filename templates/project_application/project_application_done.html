@@ -1,0 +1,25 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block title %}Submitted{% endblock %}
+
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Submitted</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="panel panel-default padtop">
+    <div class="panel-heading">
+      <h4 class="panel-title">Submitted</h4>
+    </div>
+    <div class="panel-body">
+      <p>Thank you for submitting {{ org_name }} Resource Application #{{ project_application.id }}</p>
+      <p>An e-mail has been sent to you at: {{ email }} with a PDF version of the application.</p>
+      <p>If you have any comments or enquiries, please contact: {{ help_email|urlize }}</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

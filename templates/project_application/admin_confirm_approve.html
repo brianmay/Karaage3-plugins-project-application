@@ -1,0 +1,453 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% load jsonify %}
+
+{% block extrahead %}
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'project_application/css/selectize.default.css' %}" media="screen" />
+{% endblock %}
+
+{% block content_title %}Approve Application{% endblock %}
+
+{% block navigation %}
+<ul class="nav navbar-nav">
+  <li class="active"><a>Approve Application</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+  <form method="post" action=".">{% csrf_token %}
+    {{ form.management_form }}
+
+    {% if form.errors or form.non_field_errors %}
+    <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+
+    {% if form.non_field_errors %}
+    {% for err in form.non_field_errors %}
+    <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ err }}</div>
+    {% endfor %}
+    {% endif %}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Approval Process</h3>
+      </div>
+      <div class="panel-body">
+        {% if form.non_field_errors %}
+        {% for err in form.non_field_errors %}
+        <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ err }}</div>
+        {% endfor %}
+        {% endif %}
+        <p>Clicking Approve will update the Project's Title and Description to match
+        the application.  The project's Additional Req field will be updated to
+        reflect the change.</p>
+        <p>Clicking Approve will also link the project to the application and mark the application
+        as Archived.</p>
+        <p></p>
+        <p>Project and User creation and notification still need to be done separately.</p>
+        <p></p>
+        <p>If it is an existing project, ensure Project ID, Title, Supervisor and
+        Supervisor's Institute have NOT changed</p>
+        <p>If it is a new project, or should become a new project, add a unique
+        project ID with the related host institute prefix.<br/>
+        You will be made the temporary leader of the project (to get notification
+        of the real leader's join request).</p>
+        <p>You will need to invite the Supervisor, Applicant, or leaders into the
+        project.  This should be done after Approving and setting up the application.</p>
+        <p>Please check the Host, Faculty and Department, as these will be added 
+        to the database for future use.</p>
+      </div>
+    </div>
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Project Details</h3>
+      </div>
+      <div class="panel-body">
+        <div class="panel panel-default padtop">
+          <div class="panel-body">
+            <div class="row">
+              <div {% if form.proj_try.errors %}class="alert alert-danger"{% endif %}>
+                <div class="col-md-2">
+                  <label class="required">Associated/New Project</label>
+                </div>
+                <div class="col-md-8">
+                  {{ form.proj_try }}
+                </div>
+                <div class="col-md-2">
+                <button class="btn btn-default pull-right" type="submit"
+                    value="lookup" name="lookup">Refresh Project information</button>
+                </div>
+                {% for err in form.proj_try.errors %}
+                <p>{{ err }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-2">
+              </div>
+              <div class="col-md-10">
+                <span class="help-block" id="select-notify">Please Add/Select a Project</span>
+              </div>
+            </div>
+            <div class="row">
+              <div {% if form.host.errors or form.faculty.errors or form.school.errors %}class="alert alert-danger"{% endif %}>
+                <div class="col-md-2">
+                  <label class="required">Host Institute, Faculty, School</label>
+                </div>
+                <div class="col-md-4">
+                  {{ form.host }}
+                  {% for err in form.host.errors %}
+                    <p>{{ err }}</p>
+                  {% endfor %}
+                </div>
+                <div class="col-md-3">
+                  {{ form.faculty }}
+                  {% for err in form.faculty.errors %}
+                    <p>{{ err }}</p>
+                  {% endfor %}
+                </div>
+                <div class="col-md-3">
+                  {{ form.school }}
+                  {% for err in form.school.errors %}
+                    <p>{{ err }}</p>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="row">
+              <div {% if form.proj_title.errors %}class="alert alert-danger"{% endif %}>
+                <div class="col-md-2">
+                  <label class="required">Requested/New Title</label>
+                </div>
+                <div class="col-md-10">
+                  {{ form.proj_title }}
+                </div>
+                {% for err in form.proj_title.errors %}
+                <p>{{ err }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="row padtop">
+              <div class="col-md-2">
+                <label class="required">Existing Title</label>
+              </div>
+              <div class="col-md-10">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    {% if proj_try %}
+                    {{ proj_try.name }}
+                    {% else %}
+                    "New"
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="row">
+              <div {% if form.proj_desc.errors %}class="alert alert-danger"{% endif %}>
+                <div class="col-md-2">
+                  <label class="required">Requested/New Summary</label>
+                </div>
+                <div class="col-md-10">
+                  {{ form.proj_desc }}
+                </div>
+                {% for err in form.proj_desc.errors %}
+                <p>{{ err }}</p>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="row padtop">
+              <div class="col-md-2">
+                <label class="required">Existing Summary</label>
+              </div>
+              <div class="col-md-10">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    {% if proj_try %}
+                    {{ proj_try.description }}
+                    {% else %}
+                    "New"
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Leaders</h3>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th><label >Project<br/>Supervisor</label></th>
+                <th><label >Applicant</label></th>
+                <th><label >Leader</label></th>
+                <th><label >Title</label></th>
+                <th><label >Given<br/>Name</label></th>
+                <th><label >Family<br/>Name</label></th>
+                <th><label >Email</label></th>
+                <th><label >Institute</label></th>
+                <th><label >Faculty</label></th>
+                <th><label>Department</label></th>
+                <th><label >Contact<br/>Telephone<br/>Number</label></th>
+                <th><label >Level</label></th>
+                <th><label >Role</label></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in members %}
+              <tr>
+                <td align="center">
+                  {% if p.is_supervisor %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_applicant %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_leader %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td>{{ p.title|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.first_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.last_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.email|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.institute|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.faculty|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.department|default:"<h6>left blank</h6>" }}</td>
+                <td>{{ p.telephone|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_level_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_role_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">Existing Project Leaders</h3>
+        <p class="help-block">If the leaders are different, please follow up in the ticket</p>
+      </div>
+      <div class="panel-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-condensed">
+            <thead>
+              <tr>
+                <th><label >Project<br/>Supervisor</label></th>
+                <th><label >Applicant</label></th>
+                <th><label >Leader</label></th>
+                <th><label >Title</label></th>
+                <th><label >Given<br/>Name</label></th>
+                <th><label >Family<br/>Name</label></th>
+                <th><label >Email</label></th>
+                <th><label >Institute</label></th>
+                <th><label >Faculty</label></th>
+                <th><label>Department</label></th>
+                <th><label >Contact<br/>Telephone<br/>Number</label></th>
+                <th><label >Level</label></th>
+                <th><label >Role</label></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in proj_try.leaders.all %}
+              <tr>
+                <td align="center">
+                  {% if p.is_supervisor %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_applicant %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td align="center">
+                  {% if p.is_leader %}
+                  <span class="glyphicon glyphicon-ok-sign"></span>
+                  {% endif %}
+                </td>
+                <td>{{ p.title|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.first_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.last_name|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.email|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.institute|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.faculty|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.department|default:"<h6>left blank</h6>" }}</td>
+                <td>{{ p.telephone|default:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_level_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+                <td>{{ p.get_role_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <fieldset>
+      <div class="panel panel-default">
+        <div class="panel-body">
+          <div class="form-group">
+            <button class="btn btn-primary" type="submit"
+              value="approve" name="approve">Confirm Approval</button>
+            <span class="help-block" id="notify">Please Add/Select a Project</span>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+</div>
+{% endblock %}
+
+{% block extrascript %}
+<script src="{% static 'project_application/js/standalone/selectize.min.js' %}"></script>
+<script>
+  $('select[id^="id_proj_try"]').selectize({
+    create: true,
+    sortField: 'text',
+    // had to add own score function, relies on original order of choices
+    // this is MUCH simpler than 'sifter.js', so might fail in some cases
+    score: function(search) {
+      return function(item) {
+        sl = search.toLowerCase();
+        il = item.text.toLowerCase();
+        instr = il.search(sl);
+        return instr < 0 ? -1 : 1;
+      };
+    },
+  });
+  $host = $('select[id^="id_host"]');
+  $faculty = $('select[id^="id_faculty"]');
+  $school = $('select[id^="id_school"]');
+  // warn of project creation or updating
+  projects = {{ proj_ids|jsonify }}; {# adds list of all existing projects #}
+  $('select.selectized#id_proj_try,input.selectized').each(function() {
+    var $input = $(this);
+
+    var $value1 = $('#select-notify')
+    var $value2 = $('#notify')
+
+    var update = function(e) {
+      if (projects.indexOf($input.val()) < 0) {
+        if ($input.val().length > 0) {
+          str1 = 'Create Project: ';
+          str2 = "NOTE: the following Project will be created!: ";
+        } else {
+          str1 = 'Please Add/Select a Project';
+          str2 = str1;
+        }
+      } else {
+        str1 = 'Update Project: ';
+        str2 = "NOTE: the following Project will be updated: ";
+      }
+
+      $value1.text(str1 + $input.val().toUpperCase());
+      $value2.text(str2 + $input.val().toUpperCase());
+    }
+
+    $(this).on('change', update);
+    update();
+
+  });
+
+  /*
+  * Dynamic option update for institute, faculty, school
+  * Uses lookup from all_options array to select on institute and faculty
+  */
+
+  // Object.keys() compatability for older browsers
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
+  if (!Object.keys) Object.keys = function(o) {
+    if (o !== Object(o))
+      throw new TypeError('Object.keys called on a non-object');
+    var k=[],p;
+    for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) k.push(p);
+    return k;
+  }
+
+  all_choices = {{ all_choices|safe }};
+
+  $host.each(function () {
+    $(this).selectize({
+      onChange: function (inst) {
+        if (!inst.length) return;
+        $faculty[0].selectize.clearOptions();
+        $school[0].selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        var faculties = Object.keys(all_choices[inst]);
+        var opts = [];
+        for (i=0; i<faculties.length; i++) {
+          opts.push({'value':faculties[i], 'text':faculties[i]});
+        };
+        $faculty[0].selectize.addOption(opts);
+      },
+    });
+  });
+  $faculty.each(function () {
+    $(this).selectize({
+      create: true,
+      onChange: function (fac) {
+        var inst = $host[0].selectize.getValue();
+        $school[0].selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        if (!(fac in all_choices[inst])) return;
+        var schools = all_choices[inst][fac];
+        var opts = [];
+        for (i=0; i<schools.length; i++) {
+          opts.push({'value':schools[i], 'text':schools[i]});
+        };
+        $school[0].selectize.addOption(opts);
+      },
+    });
+  });
+  $school.each(function () {
+    $(this).selectize({
+      create: true,
+    });
+  });
+  // Selectize uses all options from by default
+  // Need to force 'onChange' for each row in the order
+  // institute, faculty to get correct initial options
+  $(function () {
+    $school.each(function () {
+      var inst = $host[0].selectize.getValue();
+      var fac = $faculty[0].selectize.getValue();
+      var sch = $(this)[0].selectize.getValue();
+      // set to current value, forces 'onChange' to populate options
+      $host[0].selectize.setValue(inst);
+      $faculty[0].selectize.setValue(fac);
+      $(this)[0].selectize.setValue(sch);
+    });
+  });
+</script>
+{% endblock %}

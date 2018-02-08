@@ -1,0 +1,24 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block title %}Link Sent{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Link Sent</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h4 class="panel-title">Link Sent</h4>
+        </div>
+        <div class="panel-body">
+          <p>Thank you for starting the {{ org_name }} Project Application process.</p>
+          <p>An e-mail has been sent to you at: {{ email }}</p>
+          <p>This application link will expire at 11:59pm on <strong>{{ expiry|date:"D d M Y" }}</strong></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

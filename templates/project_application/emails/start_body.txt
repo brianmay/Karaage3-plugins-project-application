@@ -1,0 +1,10 @@
+{% autoescape off %}
+Thank you for starting a {{ org_name }} Project Application.
+
+To continue Project Application #{{ project_application.id }} please go to:
+{{ link }}
+
+This is a unique link to your application, and is the only way to access your application, so please keep it safe for the duration of the application period.
+This application is due by 11:59pm {{ project_application.expires|date:"l j F Y" }}
+
+{% endautoescape %}

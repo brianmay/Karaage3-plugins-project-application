@@ -1,0 +1,9 @@
+Thank you for submitting your {{ org_name }} Project Application.
+
+Attached is a PDF version of the information you provided for:
+Project title: {{ project_application.title }}
+
+Submitted on {{ project_application.submitted_date|date:"g:i a l j F Y" }}
+
+If you have any comments or enquiries, please contact: {{ help }}
+

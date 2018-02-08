@@ -1,0 +1,8 @@
+Hi,
+{{ project_application.created_by }} has submitted Project Application #{{ project_application.id }}.
+
+They are now waiting for a {{ org_name }} administrator to process the application.
+
+To review the application, please visit the {{ org_name }} Account Management site at:
+{{ link }}view
+

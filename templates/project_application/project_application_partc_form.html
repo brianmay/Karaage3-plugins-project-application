@@ -1,0 +1,124 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block title %}Project Application: Resource Requirements{% endblock %}
+
+{% block extrastyle %}
+<style>
+    div.nodot ul li {
+      list-style-type: none;
+    }
+    input[type="radio"],input[type="checkbox"] { width: initial; vertical-align: middle;}
+</style>
+{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Resource Requirements</a></li>
+  </ul>
+{% endblock %}
+
+{% block toppager %}
+  <form method="post" action=".">{% csrf_token %}
+
+    <div class="panel panel-default nobot">
+      <div class="panel-heading text-right">
+        <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+        <button class="btn btn-default" type="submit" name="parta">Personnel...</button>
+        <button class="btn btn-default" type="submit" name="partb">Project Overview...</button>
+        <button class="btn btn-primary" type="submit" name="partc">Save</button>
+        <span class="help-block">Clicking any of these buttons will save this page.</span>
+      </div>
+    </div>
+    {% if form.errors or form.non_field_errors or formset.errors or formset.non_field.errors %}
+      <div class="alert alert-danger nobot"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+{% endblock %}
+  
+{% block content %}
+
+<div class="container-fluid">
+  <fieldset>
+    {{ form.non_field_errors }}
+    {{ form.management_form }}
+    <div class="panel panel-default padtop">
+      <div class="panel-heading">
+        <h3 class="panel-title">NOTES</h3>
+      </div>
+      <div class="panel-body">
+          <dl class="dl-horizontal">
+            <div class="list-group-item">
+            <dt>Specialised Hardware</dt>
+	    <dd>Specialised resources are available under certain conditions.  If you belive you should have access to any of these, you will need to justify access in thius application.  </dd>
+            <dd class="list-group-item list-group-item-warning">We do not guarentee access or suitability of the resources to your research.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Data</dt>
+            <dd>Data space is provided for computational tasks only. <strong> {{ org_name }} does not archive data</strong>, so it is a requirement of the grant that data is moved off {{ org_name }} resources after the project is finished. It is highly recommended that data is also moved off after related compute tasks have finished to enable all users reasonable fast access to the system.<br/>
+	  Each project gets a default initial storage allocation that is shared by all members of the project.  Once the project and work patterns are established, it is possible to apply for various storage solutions. {% if storage_href %} Please see <a href="{{ storage_href }}" target="_blank">{{ storage_href }} {% endif %}</a></dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Software</dt>
+            <dd></dd>
+            </div>
+          </div>
+          </dl>
+      </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Resource Requirements</h3>
+      </div>
+        <div class="panel-body">
+          Justify any specialised resources you may need (eg. GPGPU nodes).</p>
+          <div {% if form.hardware_request.errors %}class="alert alert-danger"{% endif %}>
+            {% for err in form.hardware_request.errors %}
+              <p>{{ err }}</p>
+            {% endfor %}
+          </div>
+          <p>
+            <span class="help-block"> Current number of characters:
+              <span id="{{ form.hardware_request.auto_id }}-count">
+                {{ form.instance.hardware_request|length|default:"0" }}</span>
+              (maximum: {{ form.hardware_request.field.max_length }})
+            </span>
+            {{ form.hardware_request}}</p>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Additional Information</h3>
+      </div>
+        <div class="panel-body">
+          Please add any further information to assist us in understanding the nature of your request.
+          <div {% if form.compute_note.errors %}class="alert alert-danger"{% endif %}>
+            {% for err in form.compute_note.errors %}
+              <p>{{ err }}</p>
+            {% endfor %}
+          </div>
+          <p>
+            <span class="help-block"> Current number of characters:
+              <span id="{{ form.compute_note.auto_id }}-count">
+                {{ form.instance.compute_note|length|default:"0" }}</span>
+              (maximum: {{ form.compute_note.field.max_length }})
+            </span>
+            {{ form.compute_note}}</p>
+        </div>
+    </div>
+
+  </fieldset>
+</div>
+{% endblock %}
+
+{% block botpager %}
+    <div class="panel panel-default nobot">
+      <div class="panel-heading text-right">
+        <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+        <button class="btn btn-default" type="submit" name="parta">Personnel...</button>
+        <button class="btn btn-default" type="submit" name="partb">Project Overview...</button>
+        <button class="btn btn-primary" type="submit" name="partc">Save</button>
+        <span class="help-block">Clicking any of these buttons will save this page.</span>
+      </div>
+    </div>
+  </form>
+{% endblock %}

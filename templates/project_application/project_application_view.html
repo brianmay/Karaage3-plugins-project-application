@@ -1,0 +1,177 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% load karaage_tags %}
+
+{% load staticfiles %}
+
+{% block content_title %}Submitted Application Details{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Submitted Details</a></li>
+  </ul>
+  {% if is_admin %}
+  <ul class="nav navbar-nav navbar-right">
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Actions <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="{% url 'project_application_submit' project_application.secret_token %}">Edit</a></li>
+        <li role="separator" class="divider"></li>
+        <li><a href="{% url 'approve_project_application' project_application.secret_token %}">Approve</a></li>
+        <li><a href="{% url 'decline_project_application' project_application.secret_token %}">Decline</a></li>
+        <li role="separator" class="divider"></li>
+        <li><a class="btn-danger" href="{% url 'delete_project_application' project_application.secret_token %}">Delete</a></li>
+      </ul>
+  {% endif %}
+    </li>
+  </ul>
+{% endblock %}
+  
+{% block content %}
+    <div class="container-fluid">
+      {% if is_admin %}
+        {% if project_application.submitted_date %}
+          <p class="lead padtop">Submitted: {{ project_application.submitted_date|date:"l j F Y" }}</p>
+        {% else %}
+          <p class="lead padtop">Not yet submitted</p>
+        {% endif %}
+
+<div class="container-fluid">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Reviewer/Administrator Comments</h3>
+      </div>
+      <div class="panel-body">
+        {% comments project_application %}
+        <span class="help-block">Please add any comments here to help with the processing of this application.</span>
+        <p class="help-block">Please include Ticket Number and assessment</p>
+      </div>
+      <div class="panel-footer">
+        <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_add_comment' project_application.secret_token %}'" > Add Comment </button>
+      </div>
+    </div>
+
+  </div>
+
+      {% else %}
+        <p class="lead padtop">This application has been submitted.</p>
+        <p>This page will be viewable until <strong>11:59pm {{ project_application.expires|date:"l j F Y" }}</strong></p>
+      {% endif %}
+  
+      <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h3 class="panel-title">Host Institute, Faculty and Department</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ supervisor.institute|default:"<h6>incomplete</h6>" }},
+             {{ supervisor.faculty|default:"<h6>incomplete</h6>" }},
+             {{ supervisor.department|default:"<h6>incomplete</h6>" }}
+          </p>
+        </div>
+      </div>
+
+      <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h3 class="panel-title">Personnel</h3>
+        </div>
+        <div class="panel-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-condensed">
+              <thead>
+                <tr>
+                  <th><label >Project<br/>Supervisor</label></th>
+                  <th><label >Applicant</label></th>
+                  <th><label >Leader</label></th>
+                  <th><label >Title</label></th>
+                  <th><label >Given<br/>Name</label></th>
+                  <th><label >Family<br/>Name</label></th>
+                  <th><label >Email</label></th>
+                  <th><label >Institute</label></th>
+                  <th><label >Faculty</label></th>
+                  <th><label>Department</label></th>
+                  <th><label >Contact<br/>Telephone<br/>Number</label></th>
+                  <th><label >Level</label></th>
+                  <th><label >Role</label></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for p in members %}
+                  <tr>
+                    <td align="center">
+                      {% if p.is_supervisor %}
+                        <span class="glyphicon glyphicon-ok-sign"></span>
+                      {% endif %}
+                    </td>
+                    <td align="center">
+                      {% if p.is_applicant %}
+                        <span class="glyphicon glyphicon-ok-sign"></span>
+                      {% endif %}
+                    </td>
+                    <td align="center">
+                      {% if p.is_leader %}
+                        <span class="glyphicon glyphicon-ok-sign"></span>
+                      {% endif %}
+                    </td>
+                    <td>{{ p.title|default_if_none:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.first_name|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.last_name|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.email|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.institute|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.faculty|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.department|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.telephone|default:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.get_level_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+                    <td>{{ p.get_role_display|default_if_none:"<h6>incomplete</h6>" }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Project Overview</h3>
+        </div>
+        <div class="list-group">
+          <div class="list-group-item">
+            <label class="list-group-label required">Project Title:</label>
+            <p class="list-group-text">{{ project_application.title|default:"<h6>incomplete</h6>" }}
+          </div>
+          <div class="list-group-item">
+            <label class="list-group-label required">Field of Research:</label>
+            <p class="list-group-text">{{ project_application.get_FOR_display|default:"<h6>incomplete</h6>"|linebreaksbr }}</p>
+          </div>
+          <div class="list-group-item">
+            <label class="list-group-label required">Summary of Proposal:</label>
+            <p class="list-group-text">{{ project_application.summary|default:"<h6>incomplete</h6>"|linebreaksbr }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Resource Requirements</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ project_application.hardware_request|default:"<h6>left blank</h6>"|linebreaksbr }}</p>
+        </div>
+      </div>
+
+      <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h3 class="panel-title">Additional Information</h3>
+        </div>
+        <div class="panel-body">
+          <p>{{ project_application.compute_note|default:"<h6>left blank</h6>"|linebreaksbr }}</p>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <div class="form-group">
+          <button class="btn btn-default" OnClick="parent.location='{% url 'project_application_pdf' project_application.secret_token %}'" > PDF </button>
+        </div>
+      </div>
+</div>
+{% endblock %}

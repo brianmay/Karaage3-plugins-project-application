@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html {% if LANGUAGE_CODE %}lang="{{ LANGUAGE_CODE|default:"en-us" }}"{% endif %} {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+
+  {% load staticfiles %}
+
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{{ org_name }} Project Applicaton{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="{% static 'project_application/css/cerulean.min.css' %}" media="screen" />
+    <link rel="stylesheet" href="{% static 'project_application/css/selectize.bootstrap3.css' %}" media="screen" />
+    <!--[if lt IE 9]><script src="http://cdnjs.cloudflare.com/ajax/libs/es5-shim/2.0.8/es5-shim.min.js"></script><![endif]-->
+
+    <!-- tweak to bootstrap theme -->
+    <style>
+      .navbar {
+          margin-bottom: 0;
+      }
+      .nobot {
+          margin-bottom: 0;
+      }
+      .padtop {
+          margin-top: 15px;
+      }
+      .show-required {
+          background-color: beige; border-radius: 4px;
+      }
+    </style>
+
+    {% block extrastyle %}{% endblock %}
+
+    {% block extrahead %}{% endblock %}
+
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+  </head>
+
+  <body>
+    {% block bodyopen %}{% endblock %}
+
+    <!-- Navbar, actually using as breadcrumbs -->
+    <div class="navbar navbar-default">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          {% block branding %}
+            <a class="navbar-brand" style="padding-top:5px;">{{ org_name }}<br/><small>Project Application</small></a>
+            {% if project_application.id != None %}
+              <a class="navbar-brand">#{{ project_application.id }}</a>
+            {% endif %}
+          {% endblock %}
+        </div>
+          {% block navigation %}
+            <ul class="nav navbar-nav">
+            </ul>
+         {% endblock %}
+      </div>
+    </div>
+
+    {% block toppager %}
+    {% endblock %}
+
+    {% block messages %}
+      {% if messages %}
+        {% for message in messages %}
+          {% if message.tags == 'info' %}
+            <div class="alert alert-success nobot"><span class="glyphicon glyphicon-ok-sign"></span> &nbsp; &nbsp;{{ message }}</div>
+          {% endif %}
+          {% if message.tags == 'error' %}
+            <div class="alert alert-danger nobot"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ message }}</div>
+          {% endif %}
+          {% if message.tags == 'warning' %}
+            <div class="alert alert-warning nobot"><span class="glyphicon glyphicon-exclamation-sign"></span> &nbsp; &nbsp;{{ message }}</div>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+    {% endblock messages %}
+
+    {% block content %}
+    <div class="container-fliud">
+    </div>
+    {% endblock %}
+
+    {% block bodyclose %}{% endblock %}
+
+    {% block botpager %}
+    {% endblock %}
+
+    {% block footer %}
+        {% include "project_application/footer.html" %}
+    {% endblock %}
+
+    <!-- load scripts last -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+<!--
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+    <script src="{% static 'project_application/js/bootstrap.min.js' %}"></script> -->
+    <script src="{% static 'project_application/js/standalone/selectize.min.js' %}"></script>
+    <script>
+      <!-- Character Counter -->
+      function charCounter(field) {
+          var cache = field
+          var val = cache.value
+          <!-- count newlines too -->
+          var numberNewlines = (val.match(/\n/g)||[]).length;
+          var totalChars = val.length + numberNewlines;
+          if ($(cache)) {
+             $('#' + $(cache).attr('id') + '-count').html(totalChars);
+          };
+      };
+
+      <!-- run on document load -->
+//      $(document).ready(function() {
+          $("textarea").bind("keyup propertychange input paste drop", function() {charCounter(this);})
+//      });
+    </script>
+    {% block extrascript %}
+    {% endblock %}
+  </body>
+</html>
+

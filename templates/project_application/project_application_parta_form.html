@@ -1,0 +1,457 @@
+{% extends "project_application/project_application_forms.html" %}
+{% load staticfiles %}
+{% load jsonify %}
+
+{% block title %}Project Application: Personnel{% endblock %}
+
+{% block extrastyle %}
+<link rel="stylesheet" href="{% static 'project_application/css/selectize.default.css' %}" media="screen" />
+  <style>
+    #sortable { table-row-group: none; margin: 0; padding: 0; }
+    .ui-state-highlight { tr display:inline-block; height: 3.8em; line-height: 3.8em; margin: 0; padding: 0; box-shadow: inset 1px 1px 1px grey, 0 0 1px grey;}
+    .glyphicon-resize-vertical { cursor: pointer; vertical-align: -13px;}
+    input[type="radio"],input[type="checkbox"] { width: initial; vertical-align: middle;}
+    .form-control { width: auto; white-space: nowrap; text-overflow: hidden; }
+    .form-control[id$="title"] { width: 6em; }
+    .form-control[id$="email"] { min-width: 10em; }
+    .form-control[id$="first_name"] { min-width: 8em; }
+    .form-control[id$="last_name"] { min-width: 8em; }
+    .form-control[id$="telephone"] { min-width: 8em; }
+    .form-control[id$="level"] { width: 6em; }
+    .form-control[id$="role"] { width: 6em; }
+    .selectize-input { background-image: initial; background-color: beige; }
+  </style>
+{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Personnel</a></li>
+  </ul>
+{% endblock %}
+
+{% block toppager %}
+  <form method="post" action=".">{% csrf_token %}
+
+    <div class="panel panel-default nobot">
+      <div class="panel-heading text-right">
+        <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+        <button class="btn btn-primary" type="submit" name="parta">Save</button>
+        <button class="btn btn-default" type="submit" name="partb">Project Overview...</button>
+        <button class="btn btn-default" type="submit" name="partc">Resource Requirements...</button>
+        <span class="help-block">Clicking any of these buttons will save this page.</span>
+      </div>
+    </div>
+    {% if formset.total_error_count or member_formset.non_field_errors %}
+      <div class="alert alert-danger nobot"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+{% endblock %}
+  
+{% block content %}
+
+    {% if member_formset.non_field_errors %}
+      {% for err in member_formset.non_field_errors %}
+        <div class="alert alert-danger nobot">{{ err }}</div>
+      {% endfor %}
+    {% endif %}
+    {% for hidden in member_formset.hidden_fields %}
+      {{ hidden }}
+    {% endfor %}
+
+    <div class="container-fluid">
+  
+      <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h3 class="panel-title">Note</h3>
+        </div>
+        <div class="panel-body">
+          <dl class="dl-horizontal">
+            <div class="list-group-item">
+            <dt>Supervisor</dt>
+            <dd>There must be one 'Project Supervisor' (also referred to as the Chief Principle Investigator) who is responsible for the larger scientific context of the work in this project and generally hold the overarching funding grant of the project.<br/>
+                It is recommended that the applicant is the Project Supervisor.</dd>
+            <dd class="list-group-item list-group-item-warning">The Project Supervisor will be responsible for all resource usage, including data management.  All compute, storage and software resources are accounted and reported to the Supervisor's Host institute.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Manager</dt>
+            <dd>There can be multiple 'Project Managers' who are responsible for user and resource management.<br/>
+                Students can not be Project Managers.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>e-mail</dt>
+            <dd>Please use institutional e-mail addresses where possible.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Institute, Faculty,<br/>Department</dt>
+            <dd>Please enter your institute's or organisation's full name into the field. Similarly, for the Faculty and Department fields.<br/>
+                Please use your organisation's equivalent for Faculty and Department.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Level</dt>
+            <dd>Level relates to the participant's level of appointment at their institution.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Role</dt>
+            <dd>Role relates to their role in this project.</dd>
+            </div>
+            <div class="list-group-item">
+            <dt>Delete</dt><dd class="help-block">Select Delete to clear the data for the row.</dd>
+          </div>
+          </dl>
+        </div>
+      </div>
+
+      <fieldset>
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <table class="table table-striped table-condensed">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th><label required>Supervisor</label></th>
+                  <th><label required>Manager</label></th>
+                  <th><label required>Email</label></th>
+                  <th><label required>Title</label></th>
+                  <th><label required>Given<br/>Name</label></th>
+                  <th><label required>Family<br/>Name</label></th>
+                  <th><label required>Institute</label></th>
+                  <th><label required>Faculty</label></th>
+                  <th><label required>Department</label></th>
+                  <th><label required>Contact<br/>Telephone<br/>Number</label></th>
+                  <th><label required>Level</label></th>
+                  <th><label required>Role</label></th>
+                  <th><label>Delete</label></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="sortable">
+                {{ member_formset.management_form }}
+                {% for form in member_formset.forms %}
+                  {# general errors on row above #}
+                  {% if form.non_field_errors %}
+                    <tr id="state-fixed">
+                      <td colspan=15>
+                        {% for err in form.non_field_errors %}
+                          <div class="alert alert-danger nobot">{{ err }}</div>
+                        {% endfor %}
+                      </td>
+                    </tr>
+                  {% endif %}
+                  {# fix applicant row and empty rows #}
+                  {% if form.instance.is_applicant or form.instance.pk == None %}
+                    <tr id="state-fixed">
+                  {% else %}
+                    <tr>
+                  {% endif %}
+                  {# hiden display order handled below #}
+                  {{ form.is_applicant.as_hidden }}
+                  <td>
+                    {{ form.id }}
+                    {% if form.instance.id != None and not form.instance.is_applicant %}
+                      <span class="glyphicon glyphicon-resize-vertical"></span>
+                    {% endif %}
+                  </td>
+                  <td align="center">
+                    {# NOTE value and id must match what would be in checkbox #}
+                    <input class="form-control" type="radio"
+                            name="is_supervisor" value="projectapplicationmember_set-{{ forloop.counter0 }}"
+                            id="id_projectapplicationmember_set-{{ forloop.counter0 }}-is_supervisor"
+                            {% if form.instance.is_supervisor %}checked="checked"{% endif %}>
+                  </td>
+                  <td align="center">{{ form.is_leader }}</td>
+                  {% if form.instance.is_applicant %}
+                    <td><p class="form-control-static">{{ project_application.created_by }}{{ form.email.as_hidden }}</p></td> {# TODO: don;t pass through POST at all #}
+                  {% else %}
+                    <td>
+                      <div {% if form.email.errors %}class="alert alert-danger"{% endif %}>
+                        {% for err in form.email.errors %}
+                            {{ err }}
+                        {% endfor %}
+                        {{ form.email }}
+                      </div>
+                    </td>
+                  {% endif %}
+                  <td {% if form.instance.id != None %}class="required"{% endif %}>
+                    <div {% if form.title.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.title.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.title }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.first_name.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.first_name.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.first_name }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.last_name.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.last_name.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.last_name }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.institute.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.institute.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.institute }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.faculty.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.faculty.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.faculty }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.department.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.department.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.department }}
+                    </div>
+                  </td>
+                  <td>
+                    <div {% if form.telephone.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.telephone.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.telephone }}
+                    </div>
+                  </td>
+                  <td {% if form.instance.id != None %}class="required"{% endif %}>
+                    <div {% if form.level.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.level.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.level }}
+                    </div>
+                  </td>
+                  <td {% if form.instance.id != None %}class="required"{% endif %}>
+                    <div {% if form.role.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.role.errors %}
+                          {{ err }}
+                      {% endfor %}
+                      {{ form.role }}
+                    </div>
+                  </td>
+                  {# no DELETE for applicant #}
+                  <td align="center">
+                    {% if not form.instance.is_applicant %}
+                    {# NOTE value and id must match what would be in checkbox #}
+                    <input class="form-control" type="checkbox" name="projectapplicationmember_set-{{ forloop.counter0 }}-DELETE"
+                            id="id_projectapplicationmember_set-{{ forloop.counter0 }}-DELETE">
+                    {% endif %}
+                  </td>
+                  {% if form.instance.id != None %}<td id="disp_order">{% else %}<td>{% endif %}{{ form.disp_order.as_hidden }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <button class="btn btn-default" type="submit" name="parta">Save and Add rows</button>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+{% endblock %}
+
+{% block botpager %}
+    <div class="panel panel-default nobot">
+      <div class="panel-heading text-right">
+        <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+        <button class="btn btn-primary" type="submit" name="parta">Save</button>
+        <button class="btn btn-default" type="submit" name="partb">Project Overview...</button>
+        <button class="btn btn-default" type="submit" name="partc">Resource Requirements...</button>
+        <span class="help-block">Clicking any of these buttons will save this page.</span>
+      </div>
+    </div>
+  </form>
+{% endblock %}
+
+{% block extrascript %}
+  <script>
+  /*
+  * Dynamic option update for institute, faculty, school
+  * Uses lookup from all_options array to select on institute and faculty
+  */
+
+  // Object.keys() compatability for older browsers
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
+  if (!Object.keys) Object.keys = function(o) {
+    if (o !== Object(o))
+      throw new TypeError('Object.keys called on a non-object');
+    var k=[],p;
+    for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) k.push(p);
+    return k;
+  }
+
+  var $select_institute;
+  var $select_faculty;
+  var $select_school;
+  all_choices = {{ all_choices|safe }};
+
+  $select_institute = $('select[id^="id_projectapplicationmember_set"][id$="-institute"]');
+  $select_faculty = $('select[id^="id_projectapplicationmember_set"][id$="-faculty"]');
+  $select_school = $('select[id^="id_projectapplicationmember_set"][id$="-department"]');
+
+  // Plugin to keep empty option after item selected
+  Selectize.define( 'clear_selection', function ( options ) {
+    var self = this;
+
+    self.plugins.settings.dropdown_header = {
+        title: 'Clear Selection'
+    };
+    this.require( 'dropdown_header' );
+
+    self.setup = (function () {
+      var original = self.setup;
+
+      return function () {
+        original.apply( this, arguments );
+        this.$dropdown.on( 'mousedown', '.selectize-dropdown-header', function ( e ) {
+          self.setValue( '' );
+          self.close();
+          self.blur();
+
+          return false;
+        });
+      }
+    })();
+  });
+
+  $select_institute.each(function () {
+    $this = $(this);
+    $this.selectize({
+      plugins: { 'clear_selection': {} },
+      create: true,
+      sortField: 'text',
+      onChange: function (inst) {
+        if (!inst.length) return;
+        // get the id index count for id="id_faculty-#-institute"
+        var row_index = $(this)[0].$input[0].id.split('-')[1];
+        // find matching faculty and school
+        var row_str = "[id*='-"+row_index+"-']";
+        var row_faculty = $select_faculty.filter(row_str)[0];
+        var row_school = $select_school.filter(row_str)[0];
+        row_faculty.selectize.clearOptions();
+        row_school.selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        var faculties = Object.keys(all_choices[inst]);
+        var opts = [];
+        for (i=0; i<faculties.length; i++) {
+          opts.push({'value':faculties[i], 'text':faculties[i]});
+        };
+        row_faculty.selectize.addOption(opts);
+      },
+    });
+  });
+  $select_faculty.each(function () {
+    $this = $(this);
+    $this.selectize({
+      plugins: { 'clear_selection': {} },
+      create: true,
+      sortField: 'text',
+      onChange: function (fac) {
+        // get the id index count for id="id_faculty-#-faculty"
+        var row_index = $(this)[0].$input[0].id.split('-')[1];
+        // find matching institute and school
+        var row_str = "[id*='-"+row_index+"-']";
+        var row_institute = $select_institute.filter(row_str)[0];
+        var row_school = $select_school.filter(row_str)[0];
+        var inst = row_institute.selectize.getValue();
+        row_school.selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        if (!(fac in all_choices[inst])) return;
+        var schools = all_choices[inst][fac];
+        var opts = [];
+        for (i=0; i<schools.length; i++) {
+          opts.push({'value':schools[i], 'text':schools[i]});
+        };
+        row_school.selectize.addOption(opts);
+      },
+    });
+  });
+  $select_school.each(function () {
+    $this = $(this);
+    $this.selectize({
+      plugins: { 'clear_selection': {} },
+      create: true,
+      sortField: 'text',
+    });
+  });
+  // apply selectize (style) to all dropdowns
+  $('select[id^="id_projectapplicationmember_set"][id$="-title"]').selectize({ create: false, readOnly: true, onDelete: function() { return false } });
+  $('select[id^="id_projectapplicationmember_set"][id$="-role"]').selectize({ create: false, readOnly: true, onDelete: function() { return false } });
+  $('select[id^="id_projectapplicationmember_set"][id$="-level"]').selectize({ create: false, readOnly: true, onDelete: function() { return false } });
+
+  // Selectize uses all options by default
+  // Need to force 'onChange' for each row in the order
+  // institute, faculty to get correct initial options
+  $(function () {
+    /**
+    * Replace original selectize function to hide input,
+    * it pushes it off screen and shifts the horiz scroll in wide table
+    *
+    * Hides the input element out of view, while
+    * retaining its focus.
+    */
+    Selectize.prototype.hideInput = function() {
+      var self = this;
+  
+      self.setTextboxValue('');
+        self.$control_input.css('opacity', 0);
+        self.isInputHidden = true;
+    };
+    
+    $select_school.each(function () {
+      // get the id index count for id="id_faculty-#-school"
+      var row_index = $(this)[0].id.split('-')[1];
+      // find matching institute and school
+      var row_str = "[id*='-"+row_index+"-']";
+      var row_institute = $select_institute.filter(row_str)[0].selectize;
+      var row_faculty = $select_faculty.filter(row_str)[0].selectize;
+      var row_school = $(this)[0].selectize;
+      var inst = row_institute.getValue();
+      var fac = row_faculty.getValue();
+      var sch = row_school.getValue();
+      // clear empty 
+      if (!inst || !inst.trim()) { row_faculty.clearOptions() };
+      if (!fac || !fac.trim()) { row_school.clearOptions() };
+      // set to current value, forces 'onChange' to populate options
+      row_institute.setValue(inst);
+      row_faculty.setValue(fac);
+      row_school.setValue(sch);
+    });
+
+    // update style after selectize applied
+    $(".show-required .selectize-input, .show-required .selectize-dropdown").each(function () {
+      $(this).css("background-image","initial");
+      $(this).css("background-color","beige");
+    });
+
+
+      $( "#sortable" ).sortable({
+        refreshPositions: true,
+        containment: 'parent',
+        placeholder: "ui-state-highlight",
+        items: "tr:not('#state-fixed')",
+        handle: '.glyphicon-resize-vertical',
+        update: function(event, ui) {
+          $('table #disp_order').each( function(index) {
+            $( this ).find('input').val(index)
+          });
+        },
+        tolerance: 'pointer',
+        forceHelperSize: true
+      });
+    });
+
+  </script>
+{% endblock %}

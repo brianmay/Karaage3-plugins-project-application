@@ -1,0 +1,159 @@
+{% extends "project_application/project_application_forms.html" %}
+{% load staticfiles %}
+
+{% block title %}Resource Application: Project Overview{% endblock %}
+
+{% block extrastyle %}
+    <style>
+      ul li {
+          list-style-type: none;
+      }
+    </style>
+{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Project</a></li>
+  </ul>
+{% endblock %}
+
+{% block toppager %}
+  <form method="post" action=".">{% csrf_token %}
+
+    <div class="panel panel-default nobot">
+      <div class="panel-heading text-right">
+        <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+        <button class="btn btn-default" type="submit" name="parta">Personnel...</button>
+        <button class="btn btn-primary" type="submit" name="partb">Save</button>
+        <button class="btn btn-default" type="submit" name="partc">Resource Requirements...</button>
+        <span class="help-block">Clicking any of these buttons will save this page.</span>
+      </div>
+    </div>
+    {% if form.errors or form.non_field_errors %}
+      <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;Please correct any errors below.</div>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+  <div class="container-fluid">
+    <fieldset>
+      {{ form.management_form }}
+      {% if form.non_field_errors %}
+        {% for err in form.non_field_errors %}
+          <div class="alert alert-danger"><span class="glyphicon glyphicon-remove-sign"></span> &nbsp; &nbsp;{{ err }}</div>
+        {% endfor %}
+      {% endif %}
+      {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <div class="panel panel-default padtop">
+        <div class="panel-heading">
+          <h3 class="panel-title">Project Title</h3>
+        </div>
+        <div class="panel-body">
+                    <div {% if form.title.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.title.errors %}
+                        <p>{{ err }}</p>
+                      {% endfor %}
+                    </div>
+                    {{ form.title}}
+          <span class="help-block">100 characters maximum</span>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Field of Research</h3>
+        </div>
+        <div class="panel-body">
+                    <div {% if form.FOR.errors %}class="alert alert-danger"{% endif %}>
+                      {% for err in form.FOR.errors %}
+                        <p>{{ err }}</p>
+                      {% endfor %}
+                    </div>
+                    {{ form.FOR }}
+          <span class="help-block">Select the primary Field of Research.</span>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Summary of Proposal</h3>
+        </div>
+        <div class="panel-body">
+          Plain language summary of aims, significance, expected outcomes and national or community benefit.<br/>
+          If needed, please use website url's to point to supporting media.<br/>
+          This is intended for publication.</p>
+          <div {% if form.summary.errors %}class="alert alert-danger"{% endif %}>
+            {% for err in form.summary.errors %}
+              <p>{{ err }}</p>
+            {% endfor %}
+          </div>
+          <p>
+            <span class="help-block"> Current number of characters:
+              <span id="{{ form.summary.auto_id }}-count">
+                {{ form.instance.summary|length|default:"0" }}</span>
+              (maximum: {{ form.summary.field.max_length }})
+            </span>
+            {{ form.summary }}</p>
+        </div>
+      </div>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Supported Activity</h3>
+        </div>
+        <div class="panel-body">
+          <p>
+	    Please list research or teaching activities supported by this project.<br/>
+	    <ul style="list-style-type:circle"><li>List any grants supported by this project.</li>
+		    <ul><li>Please include: Granting body (ie. ARC, NHMRC, etc.), Grant Recipient,  Grant title, Amount Awarded, Start date and End date of grant.</li></ul>
+		<li>Indicate the number of students supported by this project.</li>
+            </ul>
+          </p>
+          <div {% if form.purpose.errors %}class="alert alert-danger"{% endif %}>
+            {% for err in form.purpose.errors %}
+              <p>{{ err }}</p>
+            {% endfor %}
+          </div>
+          <p>
+            <span class="help-block"> Current number of characters:
+              <span id="{{ form.purpose.auto_id }}-count">{{ form.instance.purpose|length|default:"0" }}</span>
+              (maximum: {{ form.purpose.field.max_length }})</span>
+            {{ form.purpose }}</p>
+        </div>
+      </div>
+
+    </fieldset>
+  </div>
+{% endblock %}
+
+{% block botpager %}
+<div class="panel panel-default nobot">
+  <div class="panel-heading text-right">
+    <button class="btn btn-default" type="submit" name="menu">Summary...</button>
+    <button class="btn btn-default" type="submit" name="parta">Personnel...</button>
+    <button class="btn btn-primary" type="submit" name="partb">Save</button>
+    <button class="btn btn-default" type="submit" name="partc">Resource Requirements...</button>
+  <span class="help-block">Clicking any of these buttons will save this page.</span>
+  </div>
+</div>
+</form>
+{% endblock %}
+
+{% block extrascript %}
+    <script>
+    $(document).on( "change", "input[name=continuation]",
+        function() {
+            selected = $("input[name=continuation]:checked").val();
+            if (selected === 'continue') {
+                $("div#associated").removeAttr('hidden');
+            } else {
+                $("div#associated").attr("hidden", "hidden");
+            }
+        } );
+    </script>
+{% endblock %}
+

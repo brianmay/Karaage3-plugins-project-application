@@ -1,0 +1,163 @@
+{% extends "forms.html" %}
+{% load jsonify %}
+{% load forms %}
+
+{% block extrahead %}
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static 'project_application/css/selectize.default.css' %}" media="screen" />
+<script src="{% static 'project_application/js/standalone/selectize.min.js' %}"></script>
+{% endblock %}
+
+{% block title %}Institute, Faculty, School{% endblock %}
+
+{% block content_title %}Institute, Faculty, School{% endblock %}
+
+{% block breadcrumbs %}<div class="breadcrumbs">
+    <a href='{% url "index" %}'>Home</a>&nbsp;
+    &rsaquo; &nbsp;
+    <a href='{% url "project_application_list" %}'>RAS</a>&nbsp;
+ &rsaquo; &nbsp; Institute, Faculty, School</div>
+{% endblock %}   
+
+{% block content %}
+<form method="post" action=".">{% csrf_token %}
+<div>
+        {#{% if formset.errors or formset.non_field_errors %}#}
+{% if formset.errors or formset.total_error_count %}
+    <p class="errornote">Please correct the error{{ formset.errors|pluralize }} below.</p>
+    {{ formset.errors }}
+    {{ formset.non_field_errors }}
+{% endif %}
+
+<fieldset class="module">
+<h2>Institute, Faculty, School</h2>
+{{ formset.non_field_errors }}
+{{ formset.management_form }}
+<table>
+  <thead>
+    <tr>
+      <th>Institute</th>
+      <th>Faculty</th>
+      <th>School</th>
+      <th>Delete</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for form in formset.forms %}
+    {{ form.id }}
+    <tr  class="{% cycle 'row1' 'row2' %}">
+      <td style="width:30%">{{ form.institute.errors }}{{ form.institute }}</td>
+      <td style="width:30%">{{ form.faculty.errors }}{{ form.faculty }}</td>
+      <td style="width:30%">{{ form.school.errors }}{{ form.school }}</td>
+      <td style="text-align:center; vertical-align:middle; center;width:5%">{{ form.DELETE }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+  /*
+  * Dynamic option update for institute, faculty, school
+  * Uses lookup from all_options array to select on institute and faculty
+  */
+
+  // Object.keys() compatability for older browsers
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys#Compatiblity
+  if (!Object.keys) Object.keys = function(o) {
+    if (o !== Object(o))
+      throw new TypeError('Object.keys called on a non-object');
+    var k=[],p;
+    for (p in o) if (Object.prototype.hasOwnProperty.call(o,p)) k.push(p);
+    return k;
+  }
+
+  var $select_institute;
+  var $select_faculty;
+  var $select_school;
+  all_choices = {{ all_choices|safe }};
+
+  $select_institute = $('select[id^="id_faculty"][id$="-institute"]');
+  $select_faculty = $('select[id^="id_faculty"][id$="-faculty"]');
+  $select_school = $('select[id^="id_faculty"][id$="-school"]');
+
+  $select_institute.each(function () {
+    $this = $(this);
+    $this.selectize({
+      onChange: function (inst) {
+        if (!inst.length) return;
+        // get the id index count for id="id_faculty-#-institute"
+        var row_index = $(this)[0].$input[0].id.split('-')[1];
+        // find matching faculty and school
+        var row_str = "[id*='-"+row_index+"-']";
+        var row_faculty = $select_faculty.filter(row_str)[0];
+        var row_school = $select_school.filter(row_str)[0];
+        row_faculty.selectize.clearOptions();
+        row_school.selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        var faculties = Object.keys(all_choices[inst]);
+        var opts = [];
+        for (i=0; i<faculties.length; i++) {
+          opts.push({'value':faculties[i], 'text':faculties[i]});
+        };
+        row_faculty.selectize.addOption(opts);
+      },
+    });
+  });
+  $select_faculty.each(function () {
+    $this = $(this);
+    $this.selectize({
+      create: true,
+      onChange: function (fac) {
+        // get the id index count for id="id_faculty-#-faculty"
+        var row_index = $(this)[0].$input[0].id.split('-')[1];
+        // find matching institute and school
+        var row_str = "[id*='-"+row_index+"-']";
+        var row_institute = $select_institute.filter(row_str)[0];
+        var row_school = $select_school.filter(row_str)[0];
+        var inst = row_institute.selectize.getValue();
+        row_school.selectize.clearOptions();
+        if (!(inst in all_choices)) return;
+        if (!(fac in all_choices[inst])) return;
+        var schools = all_choices[inst][fac];
+        var opts = [];
+        for (i=0; i<schools.length; i++) {
+          opts.push({'value':schools[i], 'text':schools[i]});
+        };
+        row_school.selectize.addOption(opts);
+      },
+    });
+  });
+  $select_school.each(function () {
+    $this = $(this);
+    $this.selectize({
+      create: true,
+    });
+  });
+  // Selectize uses all options from by default
+  // Need to force 'onChange' for each row in the order
+  // institute, faculty to get correct initial options
+  $(function () {
+    $select_school.each(function () {
+      // get the id index count for id="id_faculty-#-school"
+      var row_index = $(this)[0].id.split('-')[1];
+      // find matching institute and school
+      var row_str = "[id*='-"+row_index+"-']";
+      var row_institute = $select_institute.filter(row_str)[0].selectize;
+      var row_faculty = $select_faculty.filter(row_str)[0].selectize;
+      var row_school = $(this)[0].selectize;
+      var inst = row_institute.getValue();
+      var fac = row_faculty.getValue();
+      var sch = row_school.getValue();
+      // set to current value, forces 'onChange' to populate options
+      row_institute.setValue(inst);
+      row_faculty.setValue(fac);
+      row_school.setValue(sch);
+    });
+  });
+</script>
+
+<div class="submit-row">
+  <input type="submit" value="Save (Add row)" class="default" />
+</div>
+</form>
+{% endblock %}

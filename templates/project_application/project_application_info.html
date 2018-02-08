@@ -1,0 +1,50 @@
+{% extends "project_application/project_application_forms.html" %}
+
+{% block title %}New Project Application Information{% endblock %}
+
+{% block navigation %}
+  <ul class="nav navbar-nav">
+    <li class="active"><a>Getting Started</a></li>
+  </ul>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <h3>Welcome to the {{ org_name }} Project Application website.</h3>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Note</h3>
+    </div>
+    <div class="panel-body">
+      <p>Project applications are managed by the e-mail address that you provided during the application process.<br/>
+  Institutional e-mail addresses are required.</p>
+      <p>Every project <strong>must</strong> have a Project Supervisor*.
+        <br/>
+        It is recommended that the applicant is the Project Supervisor.
+      </p>
+      <div class="alert alert-danger" role="alert">
+        <p>Students can not be the Project Supervisor</p>
+      </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <p class="text-muted">* The Project Supervisor (Chief Principle Investigator) is responsible for the larger scientific context of the work and generally hold the overarching funding grant of the project.  They will be responsible for all resource usage, including data management.  All compute, storage and software resources are accounted and reported to the Supervisor's Host institute.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h4 class="panel-title">New Project Application</h4>
+    </div>
+    <div class="panel-body">
+        <p>Start a New Project Application</p>
+        </div>
+    <div class="panel-footer">
+        <button type="button" class="btn btn-primary" onClick="parent.location='{% url 'start_project_application' %}'">Start</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
