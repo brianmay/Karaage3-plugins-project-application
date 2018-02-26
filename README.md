@@ -54,7 +54,6 @@ import sys
 sys.path.append('/usr/local/src/karaage3/plugins/project_application')
 
 PLUGINS = [
-    'karaage.plugins.kgapplications.plugin',
     'project_application.plugin',
 ]
 ```
