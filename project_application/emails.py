@@ -5,7 +5,7 @@ from django.core.mail import EmailMessage
 from django.conf import settings
 
 CONTEXT = {
-    'org_email': settings.APPROVE_ACCOUNTS_EMAIL,
+    'org_email': settings.ACCOUNTS_EMAIL,
     'org_name': settings.ACCOUNTS_ORG_NAME,
 }
 
@@ -43,7 +43,7 @@ def send_start_email(project_application, link):
     email = EmailMessage(
                 subject,
                 body,
-                settings.APPROVE_ACCOUNTS_EMAIL,
+                settings.ACCOUNTS_EMAIL,
                 [to_email],
                 headers=HEADERS)
     return email.send(fail_silently=False)
@@ -64,7 +64,7 @@ def send_submit_receipt(project_application, pdf):
     email = EmailMessage(
                 subject,
                 body,
-                settings.APPROVE_ACCOUNTS_EMAIL,
+                settings.ACCOUNTS_EMAIL,
                 [to_email],
                 attachments=[
                         ('%s-Project-Application-%s.pdf'%(
@@ -86,7 +86,7 @@ def send_notify_admin(project_application, link):
     email = EmailMessage(
                 subject,
                 body,
-                settings.APPROVE_ACCOUNTS_EMAIL,
+                settings.ACCOUNTS_EMAIL,
                 [to_email],
                 headers=HEADERS)
     return email.send(fail_silently=False)

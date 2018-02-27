@@ -19,3 +19,6 @@ from karaage.plugins import BasePlugin
 
 class plugin(BasePlugin):
     name = "project_application"
+    settings = {
+        'APPROVE_ACCOUNTS_EMAIL': None,
+    }
