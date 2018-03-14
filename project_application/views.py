@@ -17,9 +17,8 @@ import django_tables2 as tables
 
 from karaage.common import is_admin, log, add_comment
 from karaage.common.decorators import admin_required
-from karaage.projects.models import Project, ProjectQuota
+from karaage.projects.models import Project
 from karaage.institutes.models import Institute
-from karaage.machines.models import MachineCategory
 
 
 from .forms import StartProjectApplicationForm, ProjectApplicationPartBForm, ProjectApplicationPartCForm
@@ -633,9 +632,6 @@ def project_application_approve(request, token):
             project.name = data['proj_title']
             project.description = data['proj_desc']
             project.institute = data['host']
-            project.save()
-            ProjectQuota.objects.get_or_create(project=project,
-                        machine_category=MachineCategory.objects.get_default())
             project.activate(request.user)
             project.save()
             project_application.project = project
