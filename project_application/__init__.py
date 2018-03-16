@@ -19,4 +19,3 @@ from karaage.plugins import BasePlugin
 
 class plugin(BasePlugin):
     name = "project_application"
-    depends = ("karaage.plugins.kgapplications.plugin", )
